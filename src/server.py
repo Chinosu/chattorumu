@@ -103,11 +103,9 @@ async def main():
 
     logging.info(f"server started on {SERVER_HOST}:{PORT}")
 
-    try:
+    with suppress(asyncio.CancelledError):
         async with server:
             await server.serve_forever()
-    except asyncio.CancelledError:
-        pass
 
     logging.info("server stopped")
 
