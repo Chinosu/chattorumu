@@ -5,7 +5,7 @@ import logging
 import functools
 from typing import Tuple
 
-from constants import *
+from config import *
 import utils
 from packet import PacketType, encode, decode
 

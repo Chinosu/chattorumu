@@ -7,7 +7,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Input, ListView, ListItem, Label
 
-from constants import *
+from config import *
 from screens.error import ErrorScreen
 from packet import PacketType, encode, decode
 
