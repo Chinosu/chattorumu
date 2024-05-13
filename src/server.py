@@ -100,8 +100,8 @@ async def main():
 
     clients = {}
 
-    server = await asyncio.start_unix_server(
-        functools.partial(handle_client, clients), path=SOCKET_PATH
+    server = await asyncio.start_server(
+        functools.partial(handle_client, clients), host=SERVER_HOST, port=PORT
     )
 
     for signal in (SIGINT, SIGTERM):
@@ -109,7 +109,7 @@ async def main():
             signal, lambda: asyncio.ensure_future(cleanup(server, clients))
         )
 
-    logging.info("server started")
+    logging.info(f"server started on {SERVER_HOST}:{PORT}")
 
     try:
         async with server:

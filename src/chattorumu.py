@@ -48,7 +48,7 @@ class ChattorumuApp(App):
         self.read_messages()
 
     async def connect_to_server(self) -> None:
-        self.reader, self.writer = await asyncio.open_unix_connection(SOCKET_PATH)
+        self.reader, self.writer = await asyncio.open_connection(CLIENT_HOST, PORT)
         self.writer.write(encode((PacketType.JOIN, self.username)))
         await self.writer.drain()
 
