@@ -1,9 +1,5 @@
 import asyncio
-import random
 from getpass import getuser
-import logging
-import sys
-import signal
 
 
 from textual import work
