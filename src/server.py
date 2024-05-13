@@ -94,10 +94,6 @@ async def main():
         ],
     )
 
-    if os.path.exists(SOCKET_PATH):
-        # Remove old socket
-        os.remove(SOCKET_PATH)
-
     clients = {}
 
     server = await asyncio.start_server(

@@ -1,6 +1,9 @@
 import asyncio
 import random
 from getpass import getuser
+import logging
+import sys
+import signal
 
 
 from textual import work
@@ -41,14 +44,16 @@ class ChattorumuApp(App):
 
         try:
             await self.connect_to_server()
-        except ConnectionRefusedError:
+        except (ConnectionRefusedError, asyncio.TimeoutError):
             self.push_screen(ErrorScreen("Could not connect to server."))
             return
 
         self.read_messages()
 
     async def connect_to_server(self) -> None:
-        self.reader, self.writer = await asyncio.open_connection(CLIENT_HOST, PORT)
+        self.reader, self.writer = await asyncio.wait_for(
+            asyncio.open_connection(CLIENT_HOST, PORT), timeout=0.5
+        )
         self.writer.write(encode((PacketType.JOIN, self.username)))
         await self.writer.drain()
 
