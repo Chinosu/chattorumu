@@ -1,16 +1,27 @@
 import asyncio
 import random
+from getpass import getuser
+
 
 from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Input, ListView, ListItem, Label
 
 from constants import *
-from screens.error import error_screen
+from screens.error import ErrorScreen
+from packet import PacketType, encode, decode
 
 
 class ChattorumuApp(App):
-    CSS_PATH = "chattorumu.tcss"
+    DEFAULT_CSS = """
+    Screen {
+        background: $panel
+    }
+    Input {
+        dock: bottom;
+        margin: 1 1;
+    }
+    """
 
     def compose(self) -> ComposeResult:
         yield Input(placeholder="")
@@ -22,17 +33,24 @@ class ChattorumuApp(App):
 
     async def on_mount(self) -> None:
         """Called when app starts."""
-        self.username = str(random.randrange(10000))
+        # self.username = str(random.randrange(10000))
+        self.username = getuser()
         self.input = self.query_one(Input)
         self.results = self.query_one(ListView)
-
         self.input.focus()
 
         try:
-            self.reader, self.writer = await asyncio.open_unix_connection(SOCKET_PATH)
-            self.read_messages()
+            await self.connect_to_server()
         except ConnectionRefusedError:
-            self.push_screen(error_screen("Could not connect to server."))
+            self.push_screen(ErrorScreen("Could not connect to server."))
+            return
+
+        self.read_messages()
+
+    async def connect_to_server(self) -> None:
+        self.reader, self.writer = await asyncio.open_unix_connection(SOCKET_PATH)
+        self.writer.write(encode((PacketType.JOIN, self.username)))
+        await self.writer.drain()
 
     async def on_input_submitted(self, message: Input.Changed) -> None:
         """A coroutine to handle a text submitted message."""
@@ -44,18 +62,23 @@ class ChattorumuApp(App):
     async def read_messages(self) -> None:
         """Infinite loop awaiting for messages from the server"""
         while True:
-            data = await self.reader.read(MAX_MESSAGE_SIZE)
+            data = await self.reader.read(MESSAGE_SIZE)
             if not data:
+                self.push_screen(ErrorScreen("Server closed."))
                 break
 
-            await self.results.append(ListItem(Label(data.decode())))
-            self.results.scroll_down()
+            type, content = decode(data)
 
-        self.push_screen(error_screen("Server closed."))
+            if type == PacketType.ERROR:
+                self.push_screen(ErrorScreen(content))
+                break
+
+            await self.results.append(ListItem(Label(content)))
+            self.results.scroll_down()
 
     @work
     async def send_message(self, message: str) -> None:
-        self.writer.write(f"<{self.username}> {message.strip()}".encode())
+        self.writer.write(encode((PacketType.MESSAGE, message.strip())))
         await self.writer.drain()
 
 

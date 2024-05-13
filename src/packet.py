@@ -1,26 +1,18 @@
 from enum import Enum, auto
-from dataclasses import dataclass
+from typing import Tuple
 
 
 class PacketType(Enum):
     JOIN = auto()
-    LEAVE = auto()
-    COMMAND = auto()
-    ERROR = auto()
+    PLAIN = auto()
     MESSAGE = auto()
-    OTHER = auto()
+    ERROR = auto()
 
 
-@dataclass(frozen=True)
-class Packet:
-    type: PacketType
-    content: str
+def encode(packet: Tuple[PacketType, str]) -> bytes:
+    return f"{packet[0].value}{packet[1]}".encode()
 
 
-def encode(packet: Packet):
-    return f"{packet.type.value}{packet.content}".encode()
-
-
-def decode(data: bytes):
+def decode(data: bytes) -> Tuple[PacketType, str]:
     data = data.decode()
-    return Packet(PacketType(int(data[0])), data[1:])
+    return PacketType(int(data[0])), data[1:]

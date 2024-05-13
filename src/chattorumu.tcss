@@ -1,8 +1,0 @@
-Screen {
-    background: $panel
-}
-
-Input {
-    dock: bottom;
-    margin: 1 1;
-}

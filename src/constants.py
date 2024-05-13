@@ -1,4 +1,6 @@
 from pathlib import Path
 
-SOCKET_PATH = str(Path(__file__).parent.parent / "chattorumu.sock")
-MAX_MESSAGE_SIZE = 280
+project_root = Path(__file__).parent
+LOG_PATH = str(project_root.parent / "server.log")
+SOCKET_PATH = str(project_root.parent / "chattorumu.sock")
+MESSAGE_SIZE = 280
