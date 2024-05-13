@@ -6,6 +6,7 @@ from signal import SIGINT, SIGTERM
 import logging
 import functools
 from typing import Tuple
+from contextlib import suppress
 
 from config import *
 import utils
@@ -25,11 +26,9 @@ async def handle_client(clients, reader, writer):
         writer.write(encode(packet))
         await writer.drain()
 
-        try:
+        with suppress(BrokenPipeError):
             writer.close()
             await writer.wait_closed()
-        except BrokenPipeError:
-            pass
         return
 
     assert username not in clients
@@ -50,11 +49,10 @@ async def handle_client(clients, reader, writer):
                 await broadcast(clients, (PacketType.PLAIN, f"<{username}> {content}"))
     except BrokenPipeError:
         del clients[writer]
-    try:
+
+    with suppress(BrokenPipeError):
         writer.close()
         await writer.wait_closed()
-    except BrokenPipeError:
-        pass
 
     await broadcast(clients, (PacketType.PLAIN, f"{username} has left"))
 
