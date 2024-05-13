@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import asyncio
 from signal import SIGINT, SIGTERM
@@ -86,7 +88,10 @@ async def main():
         level=logging.OUTGOING,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
-        handlers=[logging.FileHandler(LOG_PATH), logging.StreamHandler()],
+        handlers=[
+            logging.FileHandler(LOG_PATH),
+            # logging.StreamHandler()
+        ],
     )
 
     if os.path.exists(SOCKET_PATH):
