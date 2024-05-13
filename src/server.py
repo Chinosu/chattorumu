@@ -31,8 +31,6 @@ async def handle_client(clients, reader, writer):
             await writer.wait_closed()
         return
 
-    assert username not in clients
-
     clients[username] = writer
     await broadcast(clients, (PacketType.PLAIN, f"{username} has joined"))
 
