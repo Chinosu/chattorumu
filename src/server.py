@@ -58,14 +58,17 @@ class ChattorumuServer:
             level=logging.DEBUG,
             format="%(asctime)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
-            handlers=[logging.FileHandler(LOG_PATH), logging.StreamHandler()],
+            handlers=[
+                logging.FileHandler(LOG_PATH),
+                # logging.StreamHandler(),
+            ],
         )
 
     def __configure_server_commands(self) -> None:
         """Set up commands used by clients."""
 
         def help(username: str, args: str) -> str:
-            return "Help:\n" + "\n".join(
+            return f"Help:\n" + "\n".join(
                 [tuple[1] for tuple in self.__server_commands.values()]
             )
 
