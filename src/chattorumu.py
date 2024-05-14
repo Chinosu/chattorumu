@@ -3,6 +3,7 @@ from getpass import getuser
 
 
 from textual import work
+from textual.color import Color
 from textual.app import App, ComposeResult
 from textual.widgets import Input, ListView, ListItem, Label
 
@@ -40,7 +41,7 @@ class ChattorumuApp(App):
 
         try:
             await self.connect_to_server()
-        except (ConnectionRefusedError, asyncio.TimeoutError):
+        except (ConnectionRefusedError, asyncio.TimeoutError, OSError):
             self.push_screen(ErrorScreen("Could not connect to server."))
             return
 
@@ -50,6 +51,7 @@ class ChattorumuApp(App):
         self.reader, self.writer = await asyncio.wait_for(
             asyncio.open_connection(CLIENT_HOST, PORT), timeout=0.5
         )
+
         self.writer.write(encode((PacketType.JOIN, self.username)))
         await self.writer.drain()
 
@@ -74,8 +76,11 @@ class ChattorumuApp(App):
                 self.push_screen(ErrorScreen(content))
                 break
 
-            await self.results.append(ListItem(Label(content)))
-            self.results.scroll_down()
+            label = Label(content)
+            if type == PacketType.COMMAND_RESULT:
+                label.styles.color = Color(128, 128, 128)  # Grey
+            await self.results.append(ListItem(label))
+            self.results.scroll_relative(y=content.count("\n") + 1)
 
     @work
     async def send_message(self, message: str) -> None:
