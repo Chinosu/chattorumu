@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# The server should be run on the machine `vx10` (`login0`).
+# - `crontab -e`
+# - `* * * * * /import/kamen/6/z5488485/Public/chattorumu.start_server`
+
+# LOG_FILE="/import/kamen/6/z5488485/Public/chattorumu.cronjob.log"
+LOG_FILE="/dev/null"
+
+VENV_FILE="/import/kamen/6/z5488485/Public/chattorumu.src/.venv/bin/activate"
+SERVER_FILE="/import/kamen/6/z5488485/Public/chattorumu.src/src/server.py"
+
+date >> $LOG_FILE
+if pgrep -f "$SERVER_FILE" > /dev/null
+then
+    echo "Server already running." >> $LOG_FILE
+else
+    source $VENV_FILE
+    nohup $SERVER_FILE >> /dev/null 2>&1 &
+    echo "Starting server..." >> $LOG_FILE
+fi

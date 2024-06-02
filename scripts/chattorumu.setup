@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cp ./chattorumu.src/dist/chattorumu .
+chmod o=xr chattorumu
